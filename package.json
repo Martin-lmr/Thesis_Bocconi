@@ -1,0 +1,10 @@
+{
+  "name": "gated-evergreen-pricing",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Chapter 9 decision-support tool — gated evergreen secondary pricing (Bocconi MSc thesis)",
+  "scripts": {
+    "dev": "npx --yes serve . -l 3000",
+    "start": "npm run dev"
+  }
+}

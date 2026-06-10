@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Estimate a fair secondary price when an evergreen fund gates redemptions — guided decision-support tool." />
+  <title>Secondary Price Estimator — Gated Evergreen Funds</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231a3a5c'/%3E%3Ctext x='16' y='21' text-anchor='middle' fill='white' font-family='system-ui' font-size='14' font-weight='700'%3EP%3C/text%3E%3C/svg%3E" />
+</head>
+<body>
+  <div class="page">
+    <header class="site-header">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">OCF</span>
+        <div>
+          <div class="brand-text">Optimal Clearing Frontier</div>
+          <div class="brand-sub">Secondary pricing · gated evergreen funds</div>
+        </div>
+      </div>
+      <span class="badge">Chapter 9 · Bocconi MSc</span>
+    </header>
+
+    <section class="hero">
+      <h1>How much is my gated fund stake worth?</h1>
+      <p>This tool estimates a <strong>fair secondary sale price</strong> when you cannot redeem at NAV. It returns a range (best case → worst case), not a single quote. Based on the Chapter 9 framework in <em>Liquidity Engineering in Private Equity Funds</em>.</p>
+      <div class="hero-meta">
+        <span class="badge">Decision support only</span>
+        <span class="badge">Not a valuation certificate</span>
+      </div>
+    </section>
+
+    <section class="guide-steps" aria-label="How to use this tool">
+      <div class="guide-step">
+        <span class="guide-num">1</span>
+        <div><strong>Confirm you are gated</strong><span>If normal redemption works, exit at NAV — no discount.</span></div>
+      </div>
+      <div class="guide-step">
+        <span class="guide-num">2</span>
+        <div><strong>Fill in fund facts</strong><span>Queue, gate, portfolio mix — mostly from the prospectus or investor letter.</span></div>
+      </div>
+      <div class="guide-step">
+        <span class="guide-num">3</span>
+        <div><strong>Read your price range</strong><span>Move urgency to see where you might clear between best and stressed cases.</span></div>
+      </div>
+    </section>
+
+    <div class="toolbar-card">
+      <div class="alert" role="note">
+        <span class="alert-icon" aria-hidden="true">i</span>
+        <div><strong>Start with an example.</strong> Choose a preset below, then adjust one field at a time. Every input has a plain-English explanation — you do not need to know Greek symbols.</div>
+      </div>
+      <div class="scenario-row" aria-label="Example calibrations">
+        <span class="scenario-label">Load example:</span>
+        <button type="button" class="chip active" data-scenario="partners">Swiss PE evergreen (2026)</button>
+        <button type="button" class="chip" data-scenario="distressed">Stressed real-estate fund</button>
+      </div>
+    </div>
+
+    <div class="layout">
+      <div class="inputs-column">
+
+        <section class="panel">
+          <div class="panel-header">
+            <span class="step-badge">01</span>
+            <h2>Is redemption blocked?</h2>
+          </div>
+          <div class="panel-body">
+            <p class="panel-intro">The model only applies when the fund will <em>not</em> pay you out at NAV on request.</p>
+            <label class="toggle">
+              <input type="checkbox" id="isGated" checked />
+              <span><strong>Yes — my redemption is gated, queued or suspended.</strong><br /><small>Uncheck if you can still redeem normally at NAV.</small></span>
+            </label>
+            <p class="panel-intro panel-intro--spaced">How is the fund treating payouts right now?</p>
+            <div class="regime">
+              <label>
+                <input type="radio" name="regime" value="annuity" checked />
+                <span><strong>Partial payouts each quarter</strong><br /><small>Typical gate: you receive a slice of your request over time (most wealth funds).</small></span>
+              </label>
+              <label>
+                <input type="radio" name="regime" value="bullet" />
+                <span><strong>Full suspension</strong><br /><small>No cash until the queue clears or the fund side-pockets your stake.</small></span>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <span class="step-badge">02</span>
+            <h2>Queue &amp; portfolio</h2>
+          </div>
+          <div class="panel-body">
+            <p class="panel-intro">These numbers describe how long you wait and what the fund holds while you wait.</p>
+            <div class="field-stack">
+
+              <div class="field-card">
+                <label for="nav0"><span class="field-title">Reference NAV</span><span class="field-symbol">NAV₀</span></label>
+                <input type="number" id="nav0" value="100" min="1" step="1" />
+                <p class="field-help"><strong>What is it?</strong> The fund’s reported net asset value per share or unit.<br /><strong>Tip:</strong> Use <strong>100</strong> to express everything as % of par (easiest to read).</p>
+              </div>
+
+              <div class="field-card">
+                <label for="qt"><span class="field-title">Redemption queue size</span><span class="field-symbol">Qₜ</span></label>
+                <input type="number" id="qt" value="9.8" step="0.1" />
+                <p class="field-help"><strong>What is it?</strong> Total redemption requests waiting in line, as <strong>% of fund NAV</strong>.<br /><strong>Where to find it:</strong> GP investor letter, press release, or regulatory filing after a gating event (e.g. 9.8% means requests equal 9.8% of fund assets).</p>
+              </div>
+
+              <div class="field-card">
+                <label for="cq"><span class="field-title">Quarterly gate capacity</span><span class="field-symbol">C_q</span></label>
+                <input type="number" id="cq" value="5" step="0.1" />
+                <p class="field-help"><strong>What is it?</strong> Maximum % of NAV the fund may pay out per quarter under its gate.<br /><strong>Where to find it:</strong> Fund prospectus / KIID (often 5% per quarter for wealth-channel evergreens).</p>
+              </div>
+
+              <div class="field-card">
+                <label for="wp"><span class="field-title">Share in illiquid assets</span><span class="field-symbol">w_p</span></label>
+                <input type="number" id="wp" value="0.85" min="0" max="1" step="0.01" />
+                <p class="field-help"><strong>What is it?</strong> Fraction of the portfolio in private equity / real assets (0–1). The rest is the liquid “sleeve”.<br /><strong>Example:</strong> 0.85 = 85% illiquid, 15% cash or listed positions.<br /><strong>Where to find it:</strong> Factsheet, annual report, or liquidity sleeve disclosure.</p>
+              </div>
+
+              <div class="field-card">
+                <label for="gp"><span class="field-title">Expected growth on illiquid book</span><span class="field-symbol">g_p</span></label>
+                <input type="number" id="gp" value="0.10" step="0.005" />
+                <p class="field-help"><strong>What is it?</strong> Annual return you expect on the private portfolio while queued (decimal: 0.10 = 10%).<br /><strong>Proxy:</strong> LPX50 long-run return, manager guidance, or a conservative stress haircut in bad markets.</p>
+              </div>
+
+              <div class="field-card">
+                <label for="rc"><span class="field-title">Yield on cash sleeve</span><span class="field-symbol">r_c</span></label>
+                <input type="number" id="rc" value="0.04" step="0.005" />
+                <p class="field-help"><strong>What is it?</strong> What the liquid sleeve earns per year (decimal: 0.04 = 4%).<br /><strong>Proxy:</strong> SARON, SOFR, money-market rate, or short credit yield.</p>
+              </div>
+
+              <div class="field-card">
+                <label for="fm"><span class="field-title">Management fee (while queued)</span><span class="field-symbol">f_m</span></label>
+                <input type="number" id="fm" value="0.015" step="0.0025" />
+                <p class="field-help"><strong>What is it?</strong> Annual fee charged on NAV while you wait (decimal: 0.015 = 1.5%).<br /><strong>Where to find it:</strong> Prospectus fee table — wealth evergreens often charge 1.25–1.75% on NAV.</p>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <span class="step-badge">03</span>
+            <h2>Market conditions</h2>
+          </div>
+          <div class="panel-body">
+            <p class="panel-intro">A secondary buyer still earns a risk-free rate and demands extra compensation when credit markets are stressed.</p>
+            <div class="field-stack">
+
+              <div class="field-card">
+                <label for="rf"><span class="field-title">Risk-free interest rate</span><span class="field-symbol">r_f</span></label>
+                <input type="number" id="rf" value="0.015" step="0.001" />
+                <p class="field-help"><strong>What is it?</strong> Government bond yield for the currency and horizon of your wait (decimal).<br /><strong>Examples:</strong> Swiss 10-year ~1.5% (0.015); US 10-year ~4.5% (0.045).</p>
+              </div>
+
+              <div class="field-card">
+                <label for="lm"><span class="field-title">Liquidity stress premium</span><span class="field-symbol">λ_M</span></label>
+                <input type="number" id="lm" value="0.035" step="0.005" />
+                <p class="field-help"><strong>What is it?</strong> Extra annual return a buyer wants for locking capital in an illiquid, gated claim.<br /><strong>Easy proxy:</strong> US high-yield <strong>OAS spread</strong> (decimal: 0.035 ≈ 350 bps). Calm markets ~2–4%; stress ~6–9%. See Annex B grids.</p>
+              </div>
+
+              <div class="field-card">
+                <label for="lmBand"><span class="field-title">Uncertainty on that premium (±)</span><span class="field-symbol">λ_M band</span></label>
+                <input type="number" id="lmBand" value="0.005" step="0.005" />
+                <p class="field-help"><strong>What is it?</strong> How much the liquidity premium could swing up or down (decimal). Widens the price <strong>range</strong>. Typical: 0.005 (±50 bps).</p>
+              </div>
+
+              <div class="field-card">
+                <label for="tcost"><span class="field-title">Secondary transaction costs</span><span class="field-symbol">c</span></label>
+                <input type="number" id="tcost" value="0.5" min="0" step="0.1" />
+                <p class="field-help"><strong>What is it?</strong> Execution frictions on a bilateral sale (% of NAV): adviser, legal, platform.<br /><strong>Typical:</strong> 0–1% of NAV. Sets the maximum price (no buyer pays above NAV minus costs).</p>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <span class="step-badge">04</span>
+            <h2>Trust in the NAV</h2>
+          </div>
+          <div class="panel-body">
+            <p class="panel-intro">Buyers often pay <strong>below</strong> reported NAV when they doubt valuations — especially in stress. In the model this is the <strong>NAV credibility haircut</strong> (θ_A, “theta”).</p>
+            <div class="field-stack">
+
+              <div class="field-card highlight-card">
+                <label for="thetaMin"><span class="field-title">Best-case NAV haircut</span><span class="field-symbol">θ_A,min</span></label>
+                <input type="number" id="thetaMin" value="0.01" min="0" max="0.5" step="0.01" />
+                <p class="field-help"><strong>Plain English:</strong> If everything looks credible, how much below NAV might a buyer still demand?<br /><strong>Decimal guide:</strong> 0.01 = 1% haircut; 0.04 = 4%.<br /><strong>When low:</strong> Big Four audit, independent valuation, calm listed-PE markets.<br /><strong>Annex B calm band:</strong> roughly 1–4%.</p>
+              </div>
+
+              <div class="field-card highlight-card">
+                <label for="thetaMax"><span class="field-title">Worst-case NAV haircut</span><span class="field-symbol">θ_A,max</span></label>
+                <input type="number" id="thetaMax" value="0.04" min="0" max="0.5" step="0.01" />
+                <p class="field-help"><strong>Plain English:</strong> In a stressed sale, how deep a discount to NAV for valuation doubt?<br /><strong>Decimal guide:</strong> 0.10 = 10%; 0.25 = 25%.<br /><strong>Proxy:</strong> Listed PE / REIT discount to NAV in bad markets.<br /><strong>Annex B stress band:</strong> up to 10–25% for severe episodes.</p>
+              </div>
+
+              <div class="field-card">
+                <label for="navFac"><span class="field-title">NAV credit line (reduces doubt)</span><span class="field-symbol">facility damping</span></label>
+                <input type="number" id="navFac" value="0.10" min="0" max="0.5" step="0.05" />
+                <p class="field-help"><strong>What is it?</strong> How much a disclosed, undrawn NAV facility improves buyer confidence (decimal: 0.10 = 10% reduction in the <em>best-case</em> haircut).<br /><strong>Set to 0</strong> if no facility. Deep syndicated lines: up to 0.20.</p>
+              </div>
+
+              <div class="field-card">
+                <label for="mq"><span class="field-title">Manager quality (reduces doubt)</span><span class="field-symbol">sponsor tier</span></label>
+                <input type="number" id="mq" value="0.20" min="0" max="0.5" step="0.05" />
+                <p class="field-help"><strong>What is it?</strong> How much top-tier governance compresses the best-case haircut (decimal: 0.20 = 20%).<br /><strong>Higher if:</strong> ILPA-aligned disclosure, consistent DPI, independent third-party valuation.<br /><strong>Lower / 0</strong> for boutique sponsors with internal marks only.</p>
+              </div>
+
+              <div class="field-card">
+                <label for="alpha"><span class="field-title">Queue may grow further</span><span class="field-symbol">α (alpha)</span></label>
+                <input type="number" id="alpha" value="1.5" min="1" step="0.1" />
+                <p class="field-help"><strong>What is it?</strong> Multiplier on wait time if more investors join the queue (1.0 = no growth; 1.5 = moderate stress; 2.0 = run-like).<br /><strong>Rule of thumb:</strong> Persistent gating + media coverage → 1.5–2.0.</p>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <span class="step-badge">05</span>
+            <h2>How urgently must you sell?</h2>
+          </div>
+          <div class="panel-body gamma-block">
+            <p class="panel-intro">Even with the same fund, a patient seller clears nearer the <strong>best case</strong>; a forced seller accepts nearer the <strong>worst case</strong>. This slider (γ, “gamma”) blends between the two.</p>
+            <div class="gamma-top">
+              <span>Urgency level</span>
+              <strong id="gammaVal">0.50</strong>
+            </div>
+            <input type="range" id="gamma" min="0" max="1" step="0.05" value="0.5" aria-describedby="gammaDesc" />
+            <div class="gamma-labels">
+              <span><strong>0</strong> — I can wait; testing the market</span>
+              <span><strong>1</strong> — Must exit; deadline or forced sale</span>
+            </div>
+            <p class="field-help field-help--flush" id="gammaDesc">At 0.5 you are halfway between an opportunistic and a pressured seller — a common wealth-client scenario.</p>
+          </div>
+        </section>
+
+      </div>
+
+      <aside class="results-column sticky">
+        <section class="panel panel-results">
+          <div class="panel-header">
+            <span class="step-badge">→</span>
+            <h2>Your estimated price range</h2>
+          </div>
+          <div class="panel-body">
+            <p class="panel-intro">All prices as <strong>% of reported NAV</strong>. A discount of 5% means you receive 95 per NAV unit.</p>
+            <div id="results"></div>
+
+            <div id="frontier" class="frontier">
+              <div class="frontier-head">
+                <span>Visual range</span>
+                <span>40% — 100% of NAV</span>
+              </div>
+              <div class="bar-track" aria-hidden="true">
+                <div class="bar-range" id="barRange"></div>
+                <span class="marker base" id="markerBase" title="Worst case"></span>
+                <span class="marker final" id="markerFinal" title="Your estimate"></span>
+                <span class="marker target" id="markerTarget" title="Best case"></span>
+              </div>
+              <div class="bar-legend">
+                <span class="legend-item"><span class="dot dot--worst"></span> Worst case (forced sale)</span>
+                <span class="legend-item"><span class="dot dot--estimate"></span> Your estimate</span>
+                <span class="legend-item"><span class="dot dot--best"></span> Best case (patient seller)</span>
+              </div>
+            </div>
+
+            <div class="diag" id="diag"></div>
+
+            <details>
+              <summary>Technical details &amp; formulas</summary>
+              <ul>
+                <li><code>k = g_adj − r_f − λ_M</code> — net rate after growth, risk-free and liquidity premium</li>
+                <li><code>g_adj = w_p·g_p + (1−w_p)·r_c − f_m</code> — portfolio growth net of fees</li>
+                <li><code>Wait (years) ≈ (Q_t/C_q)/4 × α</code></li>
+                <li>θ_A = NAV credibility haircut (valuation doubt)</li>
+                <li>Partial payouts: annuity formula · Full suspension: bullet formula</li>
+              </ul>
+            </details>
+          </div>
+        </section>
+      </aside>
+    </div>
+
+    <p class="footer">Martin Lemaire · Bocconi MSc · Pedagogical tool — verify all inputs against live disclosures before any transaction.</p>
+  </div>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
